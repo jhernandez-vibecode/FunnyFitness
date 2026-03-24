@@ -190,26 +190,36 @@ const App = () => {
   // Código de grupo (simulado)
   const groupId = "FAM-7721";
 
-  // Datos de miembros (simulado)
-  const members = [
+  // Datos de miembros (simulado — se reemplaza por Firebase)
+  const INITIAL_MEMBERS = [
     { id: "1", name: "Jorge (Papá)", steps: 45200, avatar: "👴" },
     { id: "2", name: "Elena (Mamá)", steps: 31200, avatar: "👵" },
     { id: "3", name: "Sofía", steps: 12500, avatar: "👧" },
     { id: "me", name: myProfile.name, steps: 28400, avatar: myProfile.avatar },
-  ].sort((a, b) => b.steps - a.steps);
+  ];
+  const [members, setMembers] = useState(INITIAL_MEMBERS);
 
-  const maxSteps = members[0]?.steps || 1;
+  const resetRanking = () => {
+    setMembers(prev => prev.map(m => ({ ...m, steps: 0 })));
+    setOverlay(null);
+  };
+
+  const sortedMembers = [...members]
+    .map(m => m.id === "me" ? { ...m, name: myProfile.name, avatar: myProfile.avatar } : m)
+    .sort((a, b) => b.steps - a.steps);
 
   // Overlays
   const [overlay, setOverlay] = useState(null);
-  // overlay: null | "quickActions" | "editReto" | "editProfile" | "editAvatar"
+  // overlay: null | "quickActions" | "editReto" | "editProfile" | "editAvatar" | "confirmReset"
+
+  const maxSteps = sortedMembers[0]?.steps || 1;
 
   // ── Handlers ──
   const closeOverlay = () => setOverlay(null);
 
   const sendWhatsApp = () => {
     const link = `https://funny-fitness.netlify.app/?join=${groupId}`;
-    const msg  = `¡Únete a nuestro reto familiar en Funny Fitness! 🏃‍♂️\n\nEsta semana: ${reto.emoji} ${reto.text}\n\nEntra aquí: ${link}`;
+    const msg  = `¡Te invito a unirte a Funny Fitness! 🏃‍♂️\n\nMovámonos juntos, mejoremos nuestra salud y divirtámonos compitiendo con familia o amigos.\n\nÚnete aquí: ${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
@@ -293,15 +303,15 @@ const App = () => {
           </span>
         </div>
 
-        {members.map((m, i) => {
+        {sortedMembers.map((m, i) => {
           const isWinner = i === 0;
-          const isLoser  = i === members.length - 1;
+          const isLoser  = i === sortedMembers.length - 1;
           const isMe     = m.id === "me";
           const pct = Math.round((m.steps / maxSteps) * 100);
 
           return (
             <div key={m.id} className={isWinner ? "rank-row-winner" : isLoser ? "rank-row-loser" : ""}
-              style={{ padding: "0.85rem 1.25rem", display: "flex", alignItems: "center", gap: "0.85rem", borderBottom: i < members.length - 1 ? "1px solid #f8f8fb" : "none", borderRadius: i === members.length - 1 ? "0 0 1.5rem 1.5rem" : 0 }}
+              style={{ padding: "0.85rem 1.25rem", display: "flex", alignItems: "center", gap: "0.85rem", borderBottom: i < sortedMembers.length - 1 ? "1px solid #f8f8fb" : "none", borderRadius: i === sortedMembers.length - 1 ? "0 0 1.5rem 1.5rem" : 0 }}
             >
               {/* Posición */}
               <span style={{ fontWeight: 900, fontSize: "0.85rem", width: 20, textAlign: "center", flexShrink: 0, color: isWinner ? "#f59e0b" : isLoser ? "#ef4444" : "#d1d5db" }}>
@@ -394,6 +404,20 @@ const App = () => {
         <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 0.5rem" }}>Código del grupo</p>
         <p style={{ fontFamily: "monospace", fontWeight: 900, fontSize: "1.75rem", color: "#1a1a2e", letterSpacing: "0.25em", margin: 0 }}>{groupId}</p>
         <p style={{ fontSize: "0.65rem", color: "#9ca3af", fontWeight: 600, marginTop: "0.4rem" }}>Compártelo para que otros se unan</p>
+      </div>
+
+      {/* Reiniciar ranking */}
+      <div style={{ background: "#fff5f5", borderRadius: "1.5rem", padding: "1.25rem", border: "2px solid #fee2e2" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+          <div style={{ background: "#ef4444", borderRadius: "0.875rem", padding: "0.6rem", fontSize: "1.1rem" }}>🔄</div>
+          <div>
+            <p style={{ fontWeight: 800, color: "#991b1b", fontSize: "0.8rem", margin: 0 }}>Nueva semana / Nueva temporada</p>
+            <p style={{ color: "#b91c1c", fontSize: "0.65rem", fontWeight: 600, margin: 0 }}>Reinicia todos los pasos a cero</p>
+          </div>
+        </div>
+        <button onClick={() => setOverlay("confirmReset")} style={{ width: "100%", background: "#ef4444", color: "#fff", border: "none", borderRadius: "1rem", padding: "0.9rem", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.85rem", cursor: "pointer", boxShadow: "0 4px 16px rgba(239,68,68,0.25)" }}>
+          🗑 Limpiar ranking y empezar de cero
+        </button>
       </div>
 
     </div>
@@ -537,6 +561,31 @@ const App = () => {
     );
   };
 
+  /* ════════════ OVERLAY: CONFIRMAR RESET ════════════ */
+  const ConfirmResetOverlay = () => (
+    <div className="overlay-bg" onClick={closeOverlay}>
+      <div className="overlay-sheet" onClick={e => e.stopPropagation()}>
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "0.75rem" }}>⚠️</div>
+          <h3 style={{ fontWeight: 900, fontSize: "1.15rem", color: "#1a1a2e", margin: "0 0 0.5rem" }}>¿Reiniciar el ranking?</h3>
+          <p style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: 600, lineHeight: 1.5, margin: 0 }}>
+            Esto pondrá todos los pasos en cero y empezará una nueva competencia. El historial anterior se guarda.
+          </p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+          <button onClick={resetRanking}
+            style={{ width: "100%", background: "#ef4444", color: "#fff", border: "none", borderRadius: "1rem", padding: "1rem", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.95rem", cursor: "pointer", boxShadow: "0 4px 16px rgba(239,68,68,0.25)" }}>
+            ✓ Sí, limpiar y empezar de nuevo
+          </button>
+          <button onClick={closeOverlay}
+            style={{ width: "100%", background: "#f8f8fb", color: "#6b7280", border: "2px solid #e8e8f5", borderRadius: "1rem", padding: "1rem", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.95rem", cursor: "pointer" }}>
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   /* ════════════ OVERLAY: ACCIONES RÁPIDAS ════════════ */
   const QuickActionsOverlay = () => {
     const [syncing, setSyncing] = useState(false);
@@ -584,10 +633,11 @@ const App = () => {
       </main>
 
       {/* Overlays */}
-      {overlay === "editReto"   && <EditRetoOverlay />}
-      {overlay === "editProfile"&& <EditProfileOverlay />}
-      {overlay === "editAvatar" && <EditAvatarOverlay />}
-      {overlay === "quickActions" && <QuickActionsOverlay />}
+      {overlay === "editReto"      && <EditRetoOverlay />}
+      {overlay === "editProfile"   && <EditProfileOverlay />}
+      {overlay === "editAvatar"    && <EditAvatarOverlay />}
+      {overlay === "quickActions"  && <QuickActionsOverlay />}
+      {overlay === "confirmReset"  && <ConfirmResetOverlay />}
 
       {/* Bottom Nav */}
       <nav className="bottom-nav">

@@ -1,228 +1,623 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funny Fitness - App Familiar</title>
-    <!-- Tailwind CSS para el diseño -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React y Babel para procesar JSX en el navegador -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Funny Fitness – Reto Familiar</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Manrope:wght@400;600;700;800&display=swap');
+
+    * { box-sizing: border-box; }
+    body { font-family: 'Manrope', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+    h1, h2, h3, .display { font-family: 'Nunito', sans-serif; }
+
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes slideUp { from { transform: translateY(110%); } to { transform: translateY(0); } }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes popIn   { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes pulse   { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+    @keyframes spin    { to { transform: rotate(360deg); } }
+
+    .animate-slide-up { animation: slideUp 0.32s cubic-bezier(.22,1,.36,1); }
+    .animate-fade     { animation: fadeIn  0.25s ease; }
+    .animate-pop      { animation: popIn   0.28s cubic-bezier(.34,1.56,.64,1); }
+    .animate-pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
+    .animate-spin     { animation: spin 0.9s linear infinite; }
+
+    /* ── Phone frame ── */
+    .phone-frame {
+      max-width: 400px;
+      width: 100%;
+      margin: 0 auto;
+      min-height: 100dvh;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Reward banner gradient ── */
+    .reward-banner {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    }
+
+    /* ── Card styles ── */
+    .card { background: #fff; border-radius: 1.5rem; border: 1px solid #f1f1f4; }
+    .card-sm { background: #fff; border-radius: 1rem; border: 1px solid #f1f1f4; }
+
+    /* ── Bottom nav ── */
+    .bottom-nav {
+      position: absolute;
+      bottom: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 82%;
+      background: #1a1a2e;
+      border-radius: 2rem;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 30;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+
+    /* ── Overlay ── */
+    .overlay-bg {
+      position: absolute; inset: 0;
+      background: rgba(10,10,20,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 40;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: 7rem;
+      animation: fadeIn 0.2s ease;
+    }
+    .overlay-sheet {
+      background: #fff;
+      width: 100%;
+      border-radius: 2rem 2rem 0 0;
+      padding: 1.75rem 1.5rem 2rem;
+      animation: slideUp 0.32s cubic-bezier(.22,1,.36,1);
+    }
+
+    /* ── Emoji picker grid ── */
+    .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; }
+    .emoji-btn  {
+      font-size: 1.35rem; padding: 0.5rem;
+      border-radius: 0.75rem; border: 2px solid transparent;
+      cursor: pointer; transition: all 0.15s; background: #f8f8fb;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .emoji-btn:hover { background: #eeeef8; }
+    .emoji-btn.selected { border-color: #4f46e5; background: #eef2ff; transform: scale(1.12); }
+
+    /* ── Inputs ── */
+    .custom-input {
+      width: 100%; padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb; border-radius: 0.875rem;
+      font-family: 'Manrope', sans-serif; font-size: 0.875rem; font-weight: 600;
+      outline: none; transition: border-color 0.15s;
+      background: #fafafa;
+    }
+    .custom-input:focus { border-color: #4f46e5; background: #fff; }
+
+    /* ── Rank row ── */
+    .rank-row-winner { background: linear-gradient(90deg, #fef9e7 0%, #fff 100%); }
+    .rank-row-loser  { background: linear-gradient(90deg, #fef2f2 0%, #fff 100%); }
+
+    /* ── Steps bar ── */
+    .steps-bar-bg { background: #f1f1f6; border-radius: 999px; height: 5px; overflow: hidden; }
+    .steps-bar-fill { background: linear-gradient(90deg, #4f46e5, #a78bfa); height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+
+    /* ── Avatar bubble ── */
+    .avatar-bubble {
+      border-radius: 1rem; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; background: #f4f4fb; border: 2px solid #ebebf5;
+      flex-shrink: 0;
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
-    <div id="root"></div>
+<body>
+  <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
 
-        // --- ICONOS (Usando SVGs inline para máxima compatibilidad en 1 solo archivo) ---
-        const Icon = ({ name, size = 24, className = "" }) => {
-            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
-        };
+/* ═══════════════════════════════
+   DATOS CONSTANTES
+═══════════════════════════════ */
 
-        const App = () => {
-            const [user, setUser] = useState(null);
-            const [activeTab, setActiveTab] = useState('ranking');
-            const [showQuickActions, setShowQuickActions] = useState(false);
-            const [showInviteModal, setShowInviteModal] = useState(false);
-            const [isSyncing, setIsSyncing] = useState(false);
-            const [groupName, setGroupName] = useState('Funny Fitness');
-            const [activeReward, setActiveReward] = useState('Pagar las Pizzas 🍕');
-            const [myProfile, setMyProfile] = useState({ name: 'Usuario Nuevo', avatar: '👤' });
+// Avatares por categoría
+const AVATAR_CATEGORIES = {
+  "Personas": ["👨‍🦰","👩‍🦱","👨‍💻","👩‍💻","👧","👦","👵","👴","🧑","👩","🧔","👱‍♀️","👱","🤷‍♂️","🤷‍♀️","💪","🏃‍♂️","🏃‍♀️","🧘‍♀️","🧘‍♂️"],
+  "Animales": ["🦁","🐯","🐱","🐶","🦊","🐼","🐨","🦄","🐸","🐧","🦅","🦋","🐢","🦈","🦒"],
+  "Deportes": ["⚽","🏀","🎾","🏊‍♂️","🚴‍♀️","🤸‍♂️","🏋️","🥊","🎯","🏄‍♂️","⛹️","🧗","🤾‍♀️","🏌️","🥋"],
+  "Comida": ["🍎","🥑","🍌","🥦","🍓","🌽","🥕","🍇","🫐","🍉","🥝","🍋","🍑","🍒","🌶️"],
+  "Otros": ["🚀","⭐","🔥","💎","🌈","🎸","🎮","🎨","🌸","☀️","🌙","❄️","🏔️","🌊","🦸"]
+};
 
-            const familyMembers = [
-                { id: '1', name: 'Papá (Jorge)', steps: 45200, avatar: '👴' },
-                { id: '2', name: 'Mamá (Elena)', steps: 31200, avatar: '👵' },
-                { id: '3', name: 'Sofía', steps: 12500, avatar: '👧' },
-                { id: 'me', name: 'Tú', steps: 28400, avatar: '👤' }
-            ].sort((a, b) => b.steps - a.steps);
+// Emojis para los retos
+const RETO_EMOJIS = [
+  "🍕","🍔","🍣","🍜","🌮","🍦","🎂","☕","🍻","🥂",
+  "🎬","🎤","🎮","🎯","🎁","🛒","💆","🧖","💅","🛁",
+  "🧹","🍳","🚗","✈️","🏖️","🎭","📸","🎊","🏆","💰"
+];
 
-            const history = [
-                { month: 'Febrero', loser: 'Tío Juan' },
-                { month: 'Enero', loser: 'Papá' }
-            ];
+// Retos predefinidos
+const PREDEFINED_RETOS = [
+  { emoji: "🍕", text: "Pagar las pizzas del viernes" },
+  { emoji: "🍿", text: "Invitar al cine a todos" },
+  { emoji: "🍽️", text: "Lavar los platos una semana" },
+  { emoji: "☕", text: "Preparar el desayuno del domingo" },
+  { emoji: "🚗", text: "Ser el chofer del grupo" },
+  { emoji: "💆", text: "Pagar un masaje al ganador" },
+];
 
-            useEffect(() => {
-                // Inicializar iconos de Lucide después del renderizado
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            });
+// Historial de ejemplo
+const HISTORY = [
+  { month: "Marzo", loser: "Tío Juan", reward: "🍕 Pagó las pizzas" },
+  { month: "Febrero", loser: "Abuela Betty", reward: "🍿 Invitó al cine" },
+  { month: "Enero", loser: "Papá", reward: "🍽️ Lavó los platos" },
+];
 
-            const handleSync = () => {
-                setIsSyncing(true);
-                setTimeout(() => {
-                    setIsSyncing(false);
-                    setShowQuickActions(false);
-                }, 2000);
-            };
+/* ═══════════════════════════════
+   COMPONENTE PRINCIPAL
+═══════════════════════════════ */
+const App = () => {
+  const [screen, setScreen] = useState("login"); // login | main
+  const [activeTab, setActiveTab] = useState("ranking");
 
-            const renderRanking = () => (
-                <div className="flex flex-col space-y-4 p-4 animate-in fade-in duration-500">
-                    <div className="bg-indigo-600 rounded-[2.5rem] p-6 text-white shadow-xl relative overflow-hidden">
-                        <div className="relative z-10">
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Reto en curso</p>
-                            <h2 className="text-2xl font-black mt-1">{activeReward}</h2>
-                            <div className="mt-4 flex items-center bg-white/20 w-fit px-3 py-1 rounded-full text-[10px] font-bold">
-                                <span>EL ÚLTIMO PAGA LA CUENTA 🍕</span>
-                            </div>
-                        </div>
-                        <Icon name="flame" size={150} className="absolute -right-10 -bottom-10 opacity-10 rotate-12" />
-                    </div>
+  // Perfil propio
+  const [myProfile, setMyProfile] = useState({ name: "Mi Nombre", avatar: "🏃‍♂️" });
 
-                    <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-                        {history.map((h, i) => (
-                            <div key={i} className="flex-shrink-0 bg-white border border-gray-100 rounded-2xl p-3 flex items-center space-x-3 shadow-sm">
-                                <div className="text-xl">🍕</div>
-                                <div>
-                                    <p className="text-[9px] font-black text-gray-400 uppercase">{h.month}</p>
-                                    <p className="text-xs font-black text-gray-800">{h.loser} pagó</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+  // Reto activo
+  const [reto, setReto] = useState({ emoji: "🍕", text: "Pagar las pizzas del viernes" });
 
-                    <div className="bg-white rounded-[2rem] p-2 shadow-sm border border-gray-50">
-                        <div className="p-4 flex justify-between items-center border-b border-gray-50 mb-2">
-                            <h3 className="font-black text-gray-800 text-sm uppercase flex items-center">
-                                <Icon name="trophy" size={16} className="mr-2 text-yellow-500" /> Clasificación
-                            </h3>
-                            <span className="text-[10px] font-bold text-green-500 bg-green-50 px-2 py-1 rounded-lg uppercase">En vivo</span>
-                        </div>
-                        {familyMembers.map((m, i) => (
-                            <div key={m.id} className={`flex items-center justify-between p-4 rounded-2xl mb-1 ${i === 0 ? 'bg-yellow-50/50' : i === familyMembers.length - 1 ? 'bg-red-50/50' : ''}`}>
-                                <div className="flex items-center space-x-4 min-w-0">
-                                    <span className={`text-xs font-black w-4 text-center ${i === 0 ? 'text-yellow-600' : 'text-gray-300'}`}>{i + 1}</span>
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-gray-100">{m.avatar}</div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="font-bold text-gray-800 text-sm truncate">{m.name}</p>
-                                        <p className={`text-[10px] font-black uppercase ${i === familyMembers.length - 1 ? 'text-red-500' : 'text-gray-400'}`}>
-                                            {i === familyMembers.length - 1 ? '¡Paga el almuerzo! 😱' : '¡Muy bien! 💪'}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-base font-black text-gray-900 leading-none">{m.steps.toLocaleString()}</p>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pasos</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+  // Nombre del grupo
+  const [groupName, setGroupName] = useState("Familia Hernández");
+
+  // Código de grupo (simulado)
+  const groupId = "FAM-7721";
+
+  // Datos de miembros (simulado)
+  const members = [
+    { id: "1", name: "Jorge (Papá)", steps: 45200, avatar: "👴" },
+    { id: "2", name: "Elena (Mamá)", steps: 31200, avatar: "👵" },
+    { id: "3", name: "Sofía", steps: 12500, avatar: "👧" },
+    { id: "me", name: myProfile.name, steps: 28400, avatar: myProfile.avatar },
+  ].sort((a, b) => b.steps - a.steps);
+
+  const maxSteps = members[0]?.steps || 1;
+
+  // Overlays
+  const [overlay, setOverlay] = useState(null);
+  // overlay: null | "quickActions" | "editReto" | "editProfile" | "editAvatar"
+
+  // ── Handlers ──
+  const closeOverlay = () => setOverlay(null);
+
+  const sendWhatsApp = () => {
+    const link = `https://funny-fitness.netlify.app/?join=${groupId}`;
+    const msg  = `¡Únete a nuestro reto familiar en Funny Fitness! 🏃‍♂️\n\nEsta semana: ${reto.emoji} ${reto.text}\n\nEntra aquí: ${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  /* ════════════ LOGIN ════════════ */
+  if (screen === "login") return (
+    <div className="phone-frame" style={{ justifyContent: "center", alignItems: "center", padding: "2.5rem 2rem", gap: "2rem" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ width: 88, height: 88, background: "linear-gradient(135deg,#4f46e5,#7c3aed)", borderRadius: "2rem", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontSize: "2.5rem", boxShadow: "0 12px 40px rgba(79,70,229,0.3)" }}>
+          🔥
+        </div>
+        <h1 style={{ fontSize: "2.8rem", fontWeight: 900, color: "#1a1a2e", letterSpacing: "-1px", margin: 0 }}>Funny Fitness</h1>
+        <p style={{ color: "#9ca3af", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.18em", textTransform: "uppercase", marginTop: "0.5rem" }}>Movámonos juntos</p>
+      </div>
+
+      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <button
+          onClick={() => setScreen("main")}
+          style={{ width: "100%", padding: "1.1rem", background: "linear-gradient(135deg,#4f46e5,#7c3aed)", color: "#fff", borderRadius: "1.25rem", border: "none", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.95rem", letterSpacing: "0.06em", cursor: "pointer", boxShadow: "0 6px 24px rgba(79,70,229,0.28)" }}
+        >
+          Entrar al Ranking
+        </button>
+        <button
+          onClick={() => setScreen("main")}
+          style={{ width: "100%", padding: "1.1rem", background: "#f8f8fb", color: "#4f46e5", borderRadius: "1.25rem", border: "2px solid #e8e8f5", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.95rem", cursor: "pointer" }}
+        >
+          🔗 Tengo un código de invitación
+        </button>
+      </div>
+
+      <p style={{ fontSize: "0.7rem", color: "#d1d5db", fontWeight: 600, textAlign: "center" }}>
+        Sin tarjeta de crédito · Gratis para empezar
+      </p>
+    </div>
+  );
+
+  /* ════════════ RANKING TAB ════════════ */
+  const RankingTab = () => (
+    <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+
+      {/* Banner reto */}
+      <div className="reward-banner" style={{ borderRadius: "1.75rem", padding: "1.4rem 1.5rem", color: "#fff", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <p style={{ fontSize: "0.6rem", fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.7, margin: "0 0 0.35rem" }}>Reto de la semana</p>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <span style={{ fontSize: "1.8rem" }}>{reto.emoji}</span>
+            <h2 style={{ fontSize: "1.15rem", fontWeight: 900, margin: 0, lineHeight: 1.25 }}>{reto.text}</h2>
+          </div>
+          <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem" }}>
+            <span style={{ background: "rgba(255,255,255,0.2)", padding: "0.3rem 0.8rem", borderRadius: "999px", fontSize: "0.65rem", fontWeight: 700 }}>
+              ❤️ Salud familiar
+            </span>
+            <span style={{ background: "rgba(255,255,255,0.2)", padding: "0.3rem 0.8rem", borderRadius: "999px", fontSize: "0.65rem", fontWeight: 700 }}>
+              4 días restantes
+            </span>
+          </div>
+        </div>
+        <div style={{ position: "absolute", right: -20, bottom: -20, fontSize: "7rem", opacity: 0.1, transform: "rotate(12deg)" }}>⚡</div>
+      </div>
+
+      {/* Historial scroll horizontal */}
+      <div style={{ overflowX: "auto", display: "flex", gap: "0.75rem", paddingBottom: "0.25rem" }} className="scrollbar-hide">
+        {HISTORY.map((h, i) => (
+          <div key={i} className="card-sm" style={{ flexShrink: 0, padding: "0.75rem 1rem", display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 170 }}>
+            <div style={{ background: "#fef2f2", padding: "0.5rem", borderRadius: "0.75rem", fontSize: "1.2rem" }}>{h.reward.split(" ")[0]}</div>
+            <div>
+              <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>{h.month}</p>
+              <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1a1a2e", margin: "0.1rem 0 0" }}>{h.loser} perdió</p>
+              <p style={{ fontSize: "0.65rem", color: "#9ca3af", margin: 0 }}>{h.reward.replace(/^[^\s]+\s/,"")}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabla de ranking */}
+      <div className="card" style={{ padding: "0.25rem" }}>
+        <div style={{ padding: "1rem 1.25rem 0.75rem", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f1f1f4" }}>
+          <h3 style={{ fontWeight: 800, color: "#1a1a2e", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>Clasificación</h3>
+          <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "#10b981", background: "#f0fdf4", padding: "0.3rem 0.7rem", borderRadius: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span className="animate-pulse-dot" style={{ width: 6, height: 6, background: "#10b981", borderRadius: "50%", display: "inline-block" }}></span>
+            En vivo
+          </span>
+        </div>
+
+        {members.map((m, i) => {
+          const isWinner = i === 0;
+          const isLoser  = i === members.length - 1;
+          const isMe     = m.id === "me";
+          const pct = Math.round((m.steps / maxSteps) * 100);
+
+          return (
+            <div key={m.id} className={isWinner ? "rank-row-winner" : isLoser ? "rank-row-loser" : ""}
+              style={{ padding: "0.85rem 1.25rem", display: "flex", alignItems: "center", gap: "0.85rem", borderBottom: i < members.length - 1 ? "1px solid #f8f8fb" : "none", borderRadius: i === members.length - 1 ? "0 0 1.5rem 1.5rem" : 0 }}
+            >
+              {/* Posición */}
+              <span style={{ fontWeight: 900, fontSize: "0.85rem", width: 20, textAlign: "center", flexShrink: 0, color: isWinner ? "#f59e0b" : isLoser ? "#ef4444" : "#d1d5db" }}>
+                {isWinner ? "🥇" : isLoser ? "💀" : i + 1}
+              </span>
+
+              {/* Avatar */}
+              <div className="avatar-bubble" style={{ width: 44, height: 44, border: isMe ? "2px solid #4f46e5" : undefined }}>
+                {m.avatar}
+              </div>
+
+              {/* Nombre + barra */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
+                  <p style={{ fontWeight: 700, fontSize: "0.8rem", color: isMe ? "#4f46e5" : "#1a1a2e", margin: 0, truncate: true }}>
+                    {m.name}{isMe ? " (Tú)" : ""}
+                  </p>
+                  <p style={{ fontWeight: 800, fontSize: "0.85rem", color: "#1a1a2e", margin: 0 }}>
+                    {m.steps.toLocaleString()}
+                  </p>
                 </div>
-            );
-
-            const renderSettings = () => (
-                <div className="p-6 space-y-6">
-                    <h2 className="text-2xl font-black text-gray-900">Ajustes</h2>
-                    <div className="bg-[#E7F9EE] p-6 rounded-[2.5rem] border-2 border-[#D1F2DE] space-y-4">
-                        <div className="flex items-center space-x-3">
-                            <Icon name="message-circle" className="text-[#25D366]" />
-                            <h3 className="font-black text-[#075E54] text-sm uppercase tracking-wider">Invitar a la Familia</h3>
-                        </div>
-                        <button 
-                            onClick={() => window.open('https://wa.me/?text=¡Únete a Funny Fitness!', '_blank')}
-                            className="w-full bg-[#25D366] text-white font-black py-4 rounded-2xl text-xs uppercase shadow-xl active:scale-95 transition-transform"
-                        >
-                            Invitar por WhatsApp
-                        </button>
-                    </div>
-                    <div className="bg-white p-5 rounded-[2rem] border border-gray-100 text-center">
-                        <p className="text-gray-400 text-xs font-bold uppercase">Nombre del Grupo</p>
-                        <p className="text-xl font-black text-gray-800 mt-1">{groupName}</p>
-                    </div>
+                <div className="steps-bar-bg">
+                  <div className="steps-bar-fill" style={{ width: `${pct}%`, background: isLoser ? "linear-gradient(90deg,#ef4444,#fca5a5)" : undefined }}></div>
                 </div>
-            );
+                {isLoser && <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0.2rem 0 0" }}>
+                  ⚠️ {reto.emoji} ¡Esta semana paga!
+                </p>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 
-            if (!user) {
-                return (
-                    <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-8">
-                        <div className="bg-indigo-600 w-24 h-24 rounded-[3rem] flex items-center justify-center text-white shadow-2xl">
-                            <Icon name="flame" size={48} />
-                        </div>
-                        <div className="text-center">
-                            <h1 className="text-5xl font-black text-gray-900 tracking-tighter">Funny Fitness</h1>
-                            <p className="text-gray-400 font-bold uppercase text-[10px] tracking-[0.2em] mt-2">Movimiento en Familia</p>
-                        </div>
-                        <button 
-                            onClick={() => setUser({ id: 'test' })}
-                            className="w-full bg-indigo-600 text-white py-5 rounded-3xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-transform"
-                        >
-                            Comenzar Reto
-                        </button>
-                    </div>
-                );
-            }
+  /* ════════════ SETTINGS TAB ════════════ */
+  const SettingsTab = () => (
+    <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
 
-            return (
-                <div className="flex-1 flex flex-col h-full relative">
-                    <header className="px-8 py-5 flex justify-between items-center bg-white border-b border-gray-50 shrink-0">
-                        <div>
-                            <h1 className="text-xl font-black text-gray-900 truncate">{groupName}</h1>
-                            <p className="text-[10px] text-green-500 font-black uppercase flex items-center tracking-widest">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 animate-pulse"></span> Activo
-                            </p>
-                        </div>
-                        <button className="p-2.5 bg-gray-50 rounded-2xl text-gray-400"><Icon name="bell" size={20}/></button>
-                    </header>
+      <h2 style={{ fontWeight: 900, fontSize: "1.4rem", color: "#1a1a2e", margin: "0.25rem 0 0.5rem" }}>Ajustes</h2>
 
-                    <main className="flex-1 overflow-y-auto pb-32 bg-gray-50/50">
-                        {activeTab === 'ranking' ? renderRanking() : renderSettings()}
-                    </main>
+      {/* Mi perfil */}
+      <div className="card" style={{ padding: "1.25rem" }}>
+        <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 0.75rem" }}>Mi perfil</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <button onClick={() => setOverlay("editAvatar")} style={{ position: "relative", background: "none", border: "none", cursor: "pointer" }}>
+            <div className="avatar-bubble" style={{ width: 56, height: 56, border: "2px solid #e8e8f5" }}>{myProfile.avatar}</div>
+            <div style={{ position: "absolute", bottom: -2, right: -2, background: "#4f46e5", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem" }}>✏️</div>
+          </button>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: "0.65rem", fontWeight: 700, color: "#9ca3af", margin: "0 0 0.25rem" }}>Nombre en el grupo</p>
+            <button onClick={() => setOverlay("editProfile")} style={{ background: "#f8f8fb", border: "2px solid #e8e8f5", borderRadius: "0.75rem", padding: "0.5rem 0.875rem", fontFamily: "'Manrope',sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#1a1a2e", cursor: "pointer", width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>{myProfile.name}</span>
+              <span style={{ color: "#4f46e5", fontSize: "0.75rem" }}>Editar →</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
-                    {showQuickActions && (
-                        <div className="absolute inset-0 z-50 flex items-end justify-center px-4 pb-32">
-                            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowQuickActions(false)}></div>
-                            <div className="bg-white w-full rounded-[2.5rem] p-8 relative z-10 shadow-2xl animate-bounce-short">
-                                <h3 className="text-xl font-black text-gray-900 mb-6 text-center">Acciones Rápidas</h3>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <button onClick={handleSync} className="flex flex-col items-center p-4 bg-indigo-50 rounded-3xl space-y-2">
-                                        <div className={`p-3 bg-indigo-600 text-white rounded-2xl ${isSyncing ? 'animate-spin' : ''}`}><Icon name="refresh-cw" size={20}/></div>
-                                        <span className="text-[9px] font-black text-indigo-600 uppercase">Sinc</span>
-                                    </button>
-                                    <button className="flex flex-col items-center p-4 bg-orange-50 rounded-3xl space-y-2">
-                                        <div className="p-3 bg-orange-500 text-white rounded-2xl"><Icon name="send" size={20}/></div>
-                                        <span className="text-[9px] font-black text-orange-600 uppercase">Piqué</span>
-                                    </button>
-                                    <button onClick={() => setShowInviteModal(true)} className="flex flex-col items-center p-4 bg-green-50 rounded-3xl space-y-2">
-                                        <div className="p-3 bg-green-600 text-white rounded-2xl"><Icon name="user-plus" size={20}/></div>
-                                        <span className="text-[9px] font-black text-green-600 uppercase">Invitar</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+      {/* Reto de la semana */}
+      <div className="card" style={{ padding: "1.25rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+          <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.12em", margin: 0 }}>Reto del mes</p>
+          <button onClick={() => setOverlay("editReto")} style={{ background: "#eef2ff", color: "#4f46e5", border: "none", borderRadius: "0.6rem", padding: "0.3rem 0.75rem", fontFamily: "'Manrope',sans-serif", fontWeight: 700, fontSize: "0.7rem", cursor: "pointer" }}>
+            ✏️ Editar
+          </button>
+        </div>
+        <div style={{ background: "#f8f8fb", borderRadius: "1rem", padding: "1rem", display: "flex", alignItems: "center", gap: "0.75rem", border: "2px solid #e8e8f5" }}>
+          <span style={{ fontSize: "2rem" }}>{reto.emoji}</span>
+          <p style={{ fontWeight: 700, fontSize: "0.875rem", color: "#1a1a2e", margin: 0 }}>{reto.text}</p>
+        </div>
+      </div>
 
-                    <nav className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[85%] bg-gray-900 rounded-[2.5rem] py-5 px-10 shadow-2xl flex justify-between items-center z-30">
-                        <button onClick={() => setActiveTab('ranking')} className={`flex flex-col items-center ${activeTab === 'ranking' ? 'text-indigo-400' : 'text-gray-500'}`}>
-                            <Icon name="trophy" size={24} />
-                            <span className="text-[9px] font-black uppercase mt-1">Ranking</span>
-                        </button>
-                        <div className="relative">
-                            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-full">
-                                <button onClick={() => setShowQuickActions(true)} className="bg-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"><Icon name="flame" size={28} /></button>
-                            </div>
-                        </div>
-                        <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center ${activeTab === 'settings' ? 'text-indigo-400' : 'text-gray-500'}`}>
-                            <Icon name="settings" size={24} />
-                            <span className="text-[9px] font-black uppercase mt-1">Ajustes</span>
-                        </button>
-                    </nav>
+      {/* Invitar por WhatsApp */}
+      <div style={{ background: "linear-gradient(135deg,#e7f9ee,#d1f2de)", borderRadius: "1.5rem", padding: "1.25rem", border: "2px solid #bbf0d0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+          <div style={{ background: "#25d366", borderRadius: "0.875rem", padding: "0.6rem", fontSize: "1.1rem" }}>💬</div>
+          <div>
+            <p style={{ fontWeight: 800, color: "#075e54", fontSize: "0.8rem", margin: 0 }}>Invitar por WhatsApp</p>
+            <p style={{ color: "#1a7c4e", fontSize: "0.65rem", fontWeight: 600, margin: 0 }}>Manda el link del grupo automáticamente</p>
+          </div>
+        </div>
+        <button onClick={sendWhatsApp} style={{ width: "100%", background: "#25d366", color: "#fff", border: "none", borderRadius: "1rem", padding: "0.9rem", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.85rem", cursor: "pointer", boxShadow: "0 4px 16px rgba(37,211,102,0.3)" }}>
+          📤 Enviar invitación
+        </button>
+      </div>
+
+      {/* Código de grupo */}
+      <div className="card" style={{ padding: "1.25rem", textAlign: "center" }}>
+        <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 0.5rem" }}>Código del grupo</p>
+        <p style={{ fontFamily: "monospace", fontWeight: 900, fontSize: "1.75rem", color: "#1a1a2e", letterSpacing: "0.25em", margin: 0 }}>{groupId}</p>
+        <p style={{ fontSize: "0.65rem", color: "#9ca3af", fontWeight: 600, marginTop: "0.4rem" }}>Compártelo para que otros se unan</p>
+      </div>
+
+    </div>
+  );
+
+  /* ════════════ OVERLAY: EDITAR RETO ════════════ */
+  const EditRetoOverlay = () => {
+    const [localEmoji, setLocalEmoji] = useState(reto.emoji);
+    const [localText,  setLocalText]  = useState(reto.text);
+    const [emojiTab,   setEmojiTab]   = useState(false);
+
+    return (
+      <div className="overlay-bg" onClick={closeOverlay}>
+        <div className="overlay-sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: "88dvh", overflowY: "auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+            <h3 style={{ fontWeight: 900, fontSize: "1.15rem", color: "#1a1a2e", margin: 0 }}>Editar reto</h3>
+            <button onClick={closeOverlay} style={{ background: "#f1f1f4", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: "1rem" }}>✕</button>
+          </div>
+
+          {/* Retos predefinidos */}
+          <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 0.5rem" }}>Retos rápidos</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "1.25rem" }}>
+            {PREDEFINED_RETOS.map((r, i) => (
+              <button key={i} onClick={() => { setLocalEmoji(r.emoji); setLocalText(r.text); }}
+                style={{ background: localText === r.text ? "#eef2ff" : "#f8f8fb", border: `2px solid ${localText === r.text ? "#4f46e5" : "transparent"}`, borderRadius: "0.875rem", padding: "0.75rem 1rem", textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.75rem", fontFamily: "'Manrope',sans-serif" }}>
+                <span style={{ fontSize: "1.25rem" }}>{r.emoji}</span>
+                <span style={{ fontWeight: 600, fontSize: "0.8rem", color: "#1a1a2e" }}>{r.text}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Personalizado */}
+          <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 0.5rem" }}>O escribe el tuyo</p>
+          
+          {/* Emoji selector */}
+          <div style={{ marginBottom: "0.75rem" }}>
+            <button onClick={() => setEmojiTab(!emojiTab)}
+              style={{ background: "#f8f8fb", border: "2px solid #e8e8f5", borderRadius: "0.875rem", padding: "0.6rem 1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.75rem", fontFamily: "'Manrope',sans-serif", fontWeight: 700, fontSize: "0.8rem", color: "#4f46e5" }}>
+              <span style={{ fontSize: "1.5rem" }}>{localEmoji}</span>
+              <span>{emojiTab ? "▲ Cerrar emojis" : "▼ Cambiar emoji del reto"}</span>
+            </button>
+            {emojiTab && (
+              <div className="animate-pop" style={{ background: "#f8f8fb", borderRadius: "1rem", padding: "0.875rem", marginTop: "0.5rem", border: "2px solid #e8e8f5" }}>
+                <div className="emoji-grid">
+                  {RETO_EMOJIS.map(em => (
+                    <button key={em} className={`emoji-btn${localEmoji === em ? " selected" : ""}`} onClick={() => setLocalEmoji(em)}>{em}</button>
+                  ))}
                 </div>
-            );
-        };
+              </div>
+            )}
+          </div>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+          <input className="custom-input" value={localText} onChange={e => setLocalText(e.target.value)}
+            placeholder="Ej: Pagar la cena del sábado..." style={{ marginBottom: "1.25rem" }} />
+
+          {/* Preview */}
+          <div style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed)", borderRadius: "1.25rem", padding: "1rem 1.25rem", color: "#fff", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <span style={{ fontSize: "1.75rem" }}>{localEmoji}</span>
+            <div>
+              <p style={{ fontSize: "0.6rem", opacity: 0.7, margin: "0 0 0.2rem", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>Vista previa</p>
+              <p style={{ fontWeight: 900, fontSize: "0.9rem", margin: 0 }}>{localText || "Tu reto aquí..."}</p>
+            </div>
+          </div>
+
+          <button onClick={() => { setReto({ emoji: localEmoji, text: localText }); closeOverlay(); }}
+            disabled={!localText.trim()}
+            style={{ width: "100%", background: localText.trim() ? "linear-gradient(135deg,#4f46e5,#7c3aed)" : "#e5e7eb", color: localText.trim() ? "#fff" : "#9ca3af", border: "none", borderRadius: "1rem", padding: "1rem", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.95rem", cursor: localText.trim() ? "pointer" : "not-allowed", letterSpacing: "0.05em" }}>
+            ✓ Guardar reto
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  /* ════════════ OVERLAY: EDITAR NOMBRE ════════════ */
+  const EditProfileOverlay = () => {
+    const [localName, setLocalName] = useState(myProfile.name);
+    return (
+      <div className="overlay-bg" onClick={closeOverlay}>
+        <div className="overlay-sheet" onClick={e => e.stopPropagation()}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+            <h3 style={{ fontWeight: 900, fontSize: "1.15rem", color: "#1a1a2e", margin: 0 }}>Tu nombre</h3>
+            <button onClick={closeOverlay} style={{ background: "#f1f1f4", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer" }}>✕</button>
+          </div>
+          <p style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginBottom: "0.75rem" }}>Así te verán los demás en el ranking</p>
+          <input className="custom-input" value={localName} onChange={e => setLocalName(e.target.value)} placeholder="Tu nombre..." style={{ marginBottom: "1rem" }} autoFocus />
+          <button onClick={() => { setMyProfile(p => ({...p, name: localName})); closeOverlay(); }}
+            disabled={!localName.trim()}
+            style={{ width: "100%", background: "#4f46e5", color: "#fff", border: "none", borderRadius: "1rem", padding: "1rem", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.95rem", cursor: "pointer" }}>
+            ✓ Guardar
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  /* ════════════ OVERLAY: EDITAR AVATAR ════════════ */
+  const EditAvatarOverlay = () => {
+    const [cat, setCat] = useState("Personas");
+    const [localAv, setLocalAv] = useState(myProfile.avatar);
+    return (
+      <div className="overlay-bg" onClick={closeOverlay}>
+        <div className="overlay-sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: "88dvh", overflowY: "auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <h3 style={{ fontWeight: 900, fontSize: "1.15rem", color: "#1a1a2e", margin: 0 }}>Elige tu avatar</h3>
+            <button onClick={closeOverlay} style={{ background: "#f1f1f4", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer" }}>✕</button>
+          </div>
+
+          {/* Categorías */}
+          <div style={{ display: "flex", gap: "0.4rem", overflowX: "auto", paddingBottom: "0.5rem", marginBottom: "0.875rem" }} className="scrollbar-hide">
+            {Object.keys(AVATAR_CATEGORIES).map(c => (
+              <button key={c} onClick={() => setCat(c)}
+                style={{ flexShrink: 0, padding: "0.4rem 0.9rem", borderRadius: "999px", border: "2px solid", borderColor: cat === c ? "#4f46e5" : "#e8e8f5", background: cat === c ? "#eef2ff" : "#f8f8fb", color: cat === c ? "#4f46e5" : "#9ca3af", fontFamily: "'Manrope',sans-serif", fontWeight: 700, fontSize: "0.7rem", cursor: "pointer" }}>
+                {c}
+              </button>
+            ))}
+          </div>
+
+          {/* Grid de avatares */}
+          <div className="emoji-grid" style={{ marginBottom: "1.25rem" }}>
+            {AVATAR_CATEGORIES[cat].map(av => (
+              <button key={av} className={`emoji-btn${localAv === av ? " selected" : ""}`} onClick={() => setLocalAv(av)}>{av}</button>
+            ))}
+          </div>
+
+          {/* Preview */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", background: "#f8f8fb", borderRadius: "1rem", padding: "0.875rem 1rem", marginBottom: "1.25rem", border: "2px solid #e8e8f5" }}>
+            <div className="avatar-bubble" style={{ width: 52, height: 52, border: "2px solid #4f46e5" }}>{localAv}</div>
+            <div>
+              <p style={{ fontSize: "0.65rem", color: "#9ca3af", fontWeight: 700, margin: "0 0 0.2rem" }}>Vista previa</p>
+              <p style={{ fontWeight: 800, fontSize: "0.85rem", color: "#1a1a2e", margin: 0 }}>{myProfile.name}</p>
+            </div>
+          </div>
+
+          <button onClick={() => { setMyProfile(p => ({...p, avatar: localAv})); closeOverlay(); }}
+            style={{ width: "100%", background: "#4f46e5", color: "#fff", border: "none", borderRadius: "1rem", padding: "1rem", fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: "0.95rem", cursor: "pointer" }}>
+            ✓ Usar este avatar
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  /* ════════════ OVERLAY: ACCIONES RÁPIDAS ════════════ */
+  const QuickActionsOverlay = () => {
+    const [syncing, setSyncing] = useState(false);
+    const sync = () => { setSyncing(true); setTimeout(() => { setSyncing(false); closeOverlay(); }, 1400); };
+    return (
+      <div className="overlay-bg" onClick={closeOverlay}>
+        <div className="overlay-sheet" onClick={e => e.stopPropagation()}>
+          <h3 style={{ fontWeight: 900, fontSize: "1.1rem", color: "#1a1a2e", textAlign: "center", margin: "0 0 1.25rem" }}>Acciones rápidas</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "0.75rem" }}>
+            {[
+              { bg: "#eef2ff", icon: syncing ? "⏳" : "🔄", label: "Sincronizar", color: "#4f46e5", action: sync },
+              { bg: "#fff7ed", icon: "💬",  label: "Piqué",     color: "#ea580c", action: closeOverlay },
+              { bg: "#f0fdf4", icon: "👋",  label: "Invitar",   color: "#16a34a", action: () => { closeOverlay(); setActiveTab("settings"); } },
+            ].map((a, i) => (
+              <button key={i} onClick={a.action}
+                style={{ background: a.bg, border: "2px solid transparent", borderRadius: "1.25rem", padding: "1rem 0.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+                <div style={{ background: a.color, borderRadius: "0.875rem", padding: "0.75rem", fontSize: "1.2rem" }}>{a.icon}</div>
+                <span style={{ fontSize: "0.65rem", fontWeight: 800, color: a.color, textTransform: "uppercase", letterSpacing: "0.08em" }}>{a.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ════════════ MAIN RENDER ════════════ */
+  return (
+    <div className="phone-frame">
+      {/* Header */}
+      <header style={{ padding: "1rem 1.25rem", background: "#fff", borderBottom: "1px solid #f1f1f4", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, zIndex: 10 }}>
+        <div>
+          <h1 style={{ fontWeight: 900, fontSize: "1.1rem", color: "#1a1a2e", margin: 0 }}>{groupName}</h1>
+          <p style={{ fontSize: "0.6rem", fontWeight: 800, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.12em", margin: 0, display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span className="animate-pulse-dot" style={{ width: 5, height: 5, background: "#10b981", borderRadius: "50%", display: "inline-block" }}></span>
+            Sincronizado
+          </p>
+        </div>
+        <button style={{ background: "#f8f8fb", border: "2px solid #e8e8f5", borderRadius: "0.875rem", width: 38, height: 38, cursor: "pointer", fontSize: "1rem" }}>🔔</button>
+      </header>
+
+      {/* Contenido scrolleable */}
+      <main style={{ flex: 1, overflowY: "auto", paddingBottom: "7rem" }} className="scrollbar-hide">
+        {activeTab === "ranking" ? <RankingTab /> : <SettingsTab />}
+      </main>
+
+      {/* Overlays */}
+      {overlay === "editReto"   && <EditRetoOverlay />}
+      {overlay === "editProfile"&& <EditProfileOverlay />}
+      {overlay === "editAvatar" && <EditAvatarOverlay />}
+      {overlay === "quickActions" && <QuickActionsOverlay />}
+
+      {/* Bottom Nav */}
+      <nav className="bottom-nav">
+        <button onClick={() => setActiveTab("ranking")}
+          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", opacity: activeTab === "ranking" ? 1 : 0.4, transition: "opacity 0.2s" }}>
+          <span style={{ fontSize: "1.35rem" }}>🏆</span>
+          <span style={{ fontSize: "0.55rem", fontWeight: 800, color: activeTab === "ranking" ? "#a5b4fc" : "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Ranking</span>
+        </button>
+
+        {/* Botón central flotante */}
+        <div style={{ position: "relative" }}>
+          <div style={{ position: "absolute", bottom: "1.5rem", left: "50%", transform: "translateX(-50%)", background: "#fff", borderRadius: "50%", padding: "0.3rem", boxShadow: "0 6px 24px rgba(0,0,0,0.15)" }}>
+            <button onClick={() => setOverlay("quickActions")}
+              style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed)", border: "none", borderRadius: "50%", width: 54, height: 54, cursor: "pointer", fontSize: "1.5rem", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 18px rgba(79,70,229,0.4)" }}>
+              🔥
+            </button>
+          </div>
+        </div>
+
+        <button onClick={() => setActiveTab("settings")}
+          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", opacity: activeTab === "settings" ? 1 : 0.4, transition: "opacity 0.2s" }}>
+          <span style={{ fontSize: "1.35rem" }}>⚙️</span>
+          <span style={{ fontSize: "0.55rem", fontWeight: 800, color: activeTab === "settings" ? "#a5b4fc" : "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Ajustes</span>
+        </button>
+      </nav>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
 </body>
 </html>
